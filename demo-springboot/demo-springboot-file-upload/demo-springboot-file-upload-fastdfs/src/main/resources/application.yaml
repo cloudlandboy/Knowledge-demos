@@ -1,0 +1,28 @@
+fdfs:
+  so-timeout: 1501 # 超时时间
+  connect-timeout: 601 # 连接超时时间
+  thumb-image: # 缩略图配置
+    width: 60
+    height: 60
+  tracker-list: # tracker地址：你的tracker服务器地址+端口（默认是22122）
+    - 192.168.46.99:22122
+、server:
+  port: 8080
+spring:
+  application:
+    name: demo-springboot-file-upload-fastdfs
+  servlet:
+    multipart:
+      max-file-size: 4MB #限制文件上传的大小
+      max-request-size: 100MB #最大请求大小（默认10MB），当上传文件大小超过该值时会导致触发多次MaxUploadSizeExceededException
+
+  mvc:
+    hiddenmethod:
+      filter:
+        enabled: true #开启mvc的HiddenHttpMethodFilter，以便可以表单可以发送PUT、DELETE等请求
+upload:
+  allowAvatarFileType: jpg,png
+  storage-server-domain: http://192.168.46.99/
+logging:
+  level:
+    cn.cbloy.demo.springboot.file.upload.fastdfs: debug

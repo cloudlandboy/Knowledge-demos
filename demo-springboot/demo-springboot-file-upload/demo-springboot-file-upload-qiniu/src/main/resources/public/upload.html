@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>文件上传</title>
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <style>
+        .avatar-uploader .el-upload {
+            border: 1px dashed #d9d9d9;
+            border-radius: 6px;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .avatar-uploader .el-upload:hover {
+            border-color: #409EFF;
+        }
+
+        .avatar-uploader-icon {
+            font-size: 28px;
+            color: #8c939d;
+            width: 178px;
+            height: 178px;
+            line-height: 178px;
+            text-align: center;
+        }
+
+        .avatar {
+            width: 178px;
+            height: 178px;
+            display: block;
+        }
+
+        .upload-name {
+            margin: 8px auto;
+            width: 88%;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+
+        .json-view > pre {
+            padding: 20px;
+            background-color: #C7EDCC;
+            text-align: left;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+<div id="app">
+    <el-tabs v-model="activeName" type="card">
+        <el-tab-pane label="后端单文件上传" name="serverSingle">
+
+            <!-- 单文件（头像）上传控件 -->
+            <el-upload class="avatar-uploader" action="/upload/single" :on-success="handleAvatarSuccess"
+                       :show-file-list="false"
+                       name="file" accept="image/png,image/jpeg">
+                <img v-if="serverSingle.imageUrl" :src="serverSingle.imageUrl" class="avatar">
+                <i v-else class="el-icon-plus avatar-uploader-icon"></i>
+            </el-upload>
+
+            <!-- 显示服务器响应结果 -->
+            <div v-if="serverSingle.response" class="json-view">
+                <pre>{{serverSingle.response}}</pre>
+            </div>
+        </el-tab-pane>
+        <el-tab-pane label="前端单文件上传" name="clientSingle">
+            <!-- TODO -->
+            找后端要token---使用七牛云的jsSDK
+        </el-tab-pane>
+        <el-tab-pane label="后端多文件上传" name="serverMulti">
+            <div style="width: 960px;margin: auto;text-align: center">
+                <!-- 提示 -->
+                <el-alert
+                        title="异步多文件上传也是单文件上传（前端会把文件按顺序一个一个上传）"
+                        type="info"
+                        effect="dark" style="margin: 10px 0">
+                </el-alert>
+                <!--  总上传进度 -->
+                <el-progress
+                        style="margin: 20px"
+                        :stroke-width="26"
+                        :text-inside="true"
+                        :color="serverMultiUploadColor"
+                        v-show="serverMultiUploadResult.total>0" :percentage="multiUploadPercentage"
+                        :format="multiUploadFormat"></el-progress>
+
+                <!-- 多文件上传控件 -->
+                <el-upload
+                        ref="serverMultiUpload"
+                        action="/upload/single"
+                        name="file"
+                        accept="image/png,image/jpeg"
+                        multiple="true"
+                        :limit="multiLimit"
+                        list-type="picture"
+                        :on-success="handleServerMultiUploadSuccess"
+                        :on-error="handleServerMultiUploadError"
+                        :on-change="handleServerMultiUploadChange"
+                        :on-remove="handleServerMultiUploadRemove"
+                        :before-remove="handleServerMultiUploadBeforeRemove"
+                        :auto-upload="false">
+
+                    <el-button slot="trigger" size="small" type="primary">选取文件</el-button>
+                    <el-button style="margin-left: 10px;" size="small" type="success"
+                               @click="submitUploadForServerMulti">
+                        上传到服务器
+                    </el-button>
+                    <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，数量不超过{{multiLimit}}个，单个文件大小不超过4MB</div>
+                </el-upload>
+
+                <!-- 自定义回显上传结果 （自带的好像要配合响应状态码才能正常使用）-->
+                <el-row :gutter="20">
+                    <el-col :span="8" v-for="(result,index) in serverMultiUploadResult.list" style="margin-bottom: 16px"
+                            :key="index">
+                        <el-card :body-style="{ padding: '0px',height:'300px' }">
+                            <img :src="result.file.url" v-if="result.response.success" height="200" width="100%">
+                            <el-image v-else
+                                      style="width: 100%;background-color: #C0C4CC;line-height: 200px;font-size: 48px;color: #F56C6C;">
+                                <div slot="error" class="image-slot">
+                                    <i class="el-icon-error"></i>
+                                </div>
+                            </el-image>
+                            <div>
+                                <div class="upload-name" :title="result.file.name">{{result.file.name}}</div>
+                                <div class="bottom clearfix">
+                                    <el-button type="text" class="button" @click="showResponse(index)">查看服务器响应
+                                    </el-button>
+                                </div>
+                            </div>
+                        </el-card>
+                    </el-col>
+                </el-row>
+            </div>
+        </el-tab-pane>
+        <el-tab-pane label="前端多文件上传" name="clientMulti">
+            <!-- TODO -->
+            找后端要token---使用七牛云的jsSDK
+        </el-tab-pane>
+    </el-tabs>
+
+    <!-- 侧边栏，显示服务器响应 -->
+    <el-drawer
+            :title="sideDrawer.title"
+            size="50%"
+            :visible.sync="sideDrawer.show">
+        <div class="json-view">
+            <pre>{{sideDrawer.text}}</pre>
+        </div>
+    </el-drawer>
+</div>
+</body>
+<script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.min.js"></script>
+<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/js-beautify/1.13.5/beautify.min.js"></script>
+<script>
+    // cdn引入方式开启控制台Vue.devtools插件
+    Vue.config.devtools = true;
+
+    const app = new Vue({
+        el: "#app",
+        data: {
+            activeName: "serverSingle",
+            serverSingle: {
+                imageUrl: false,
+                response: false
+            },
+            sideDrawer: {
+                show: false,
+                text: "",
+                title: ""
+            },
+            multiLimit: 20,
+            serverMultiUploadResult: { //多文件上传，文件的上传结果
+                list: [],//上传过的文件列表
+                success: 0,//上传失败文件数，不刷新页面一直累加
+                fail: 0,//总成功文件数，不刷新页面一直累加
+                total: 0,//总上传文件数，不刷新页面一直累加
+                step: 0,//用于每次上传计数
+                thisTotal: 1 //每次上传时的总文件数,最小值1
+            },
+            loading: null
+        },
+        computed: {
+            multiUploadPercentage() {
+                //计算上传进度
+                return Math.floor((this.serverMultiUploadResult.success + this.serverMultiUploadResult.fail) / this.serverMultiUploadResult.total * 100);
+            },
+            serverMultiUploadColor() {
+                return this.serverMultiUploadResult.success > this.serverMultiUploadResult.fail ?
+                    (this.serverMultiUploadResult.success === this.serverMultiUploadResult.total ? '#67C23A' : '#E6A23C') : '#F56C6C';
+            }
+        },
+        methods: {
+            handleAvatarSuccess(res, file) {
+                this[this.activeName].response = js_beautify(JSON.stringify(res));
+                this[this.activeName].imageUrl = URL.createObjectURL(file.raw);
+            },
+            handleServerMultiUploadSuccess(res, file, fileList) {
+                let result = {
+                    response: res,
+                    file: {
+                        name: file.name,
+                        url: file.url
+                    }
+                }
+                this.serverMultiUploadResult.list.unshift(result);
+                this.serverMultiUploadResult.success++;
+                this.serverMultiUploadResult.step++;
+                console.log("success")
+            },
+            /**
+             * 处理多文件上传出错
+             * @param err
+             * @param file
+             * @param fileList
+             */
+            handleServerMultiUploadError(err, file, fileList) {
+                //头部插入，让最后上传的显示在前面
+                this.serverMultiUploadResult.list.unshift({
+                    file: {
+                        name: file.name,
+                        url: file.url
+                    },
+                    response: {
+                        success: false,
+                        msg: (err.message && JSON.parse(err.message)) || '未知错误，请检查网络是否可用！',
+                    }
+                });
+                this.serverMultiUploadResult.fail++;
+                this.serverMultiUploadResult.step++;
+                console.log("error")
+            },
+            handleServerMultiUploadChange(file, fileList) {
+                //上传完毕后清空列表，不然自带的列表会显示，（不用自带的无法使用file.url）
+                // 怎么判断本次（多选）上传是否已经上传完毕，几个问题
+                //1. 控件会自动删除上传失败的file，传过来的是已经删除了失败的fileList，这时fileList就不是选择的全部文件
+                if (this.serverMultiUploadResult.step === this.serverMultiUploadResult.thisTotal) {
+                    this.serverMultiUploadResult.step = 0;
+                    this.$refs.serverMultiUpload.clearFiles();
+                    this.loading.close();
+                }
+            },
+            handleServerMultiUploadRemove(file, fileList) {
+                console.log("Remove")
+            },
+            handleServerMultiUploadBeforeRemove(file, fileList) {
+                if (file && file.status === "uploading") {
+                    return false;
+                }
+            },
+            multiUploadFormat() {
+                return "成功：" + this.serverMultiUploadResult.success + "/" + this.serverMultiUploadResult.total
+            },
+            submitUploadForServerMulti() {
+                //上传之前清理上次的结果
+                // this.serverMultiUploadResult.list = [];
+                // this.serverMultiUploadResult.success = 0;
+                // this.serverMultiUploadResult.fail = 0;
+
+                //获取要上传文件数量(追加模式)
+                let total = this.$refs.serverMultiUpload.uploadFiles.length;
+                if (total > 0) {
+                    this.serverMultiUploadResult.total += total;
+                    this.serverMultiUploadResult.thisTotal = total;
+                    //加载层，防止上传中操作
+                    this.loading = this.$loading({
+                        lock: true,
+                        background: 'rgba(255,255,255,0.2)'
+                    });
+                    // 提交多文件上传
+                    this.$refs.serverMultiUpload.submit();
+                }
+            },
+            /**
+             * 侧边栏显示服务器响应
+             * @param index
+             */
+            showResponse: function (index) {
+                this.sideDrawer.show = true;
+                let result = this.serverMultiUploadResult.list[index];
+                this.sideDrawer.title = result.file.name;
+                let jsonString = JSON.stringify(result.response);
+                this.sideDrawer.text = js_beautify(jsonString)
+            }
+        }
+    })
+</script>
+</html>

@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>文件上传</title>
+    <!-- 引入样式 -->
+    <link rel="stylesheet" href="https://lib.baomitu.com/layui/2.5.7/css/layui.min.css">
+    <style>
+        #multi-view {
+            margin: 20px 0;
+        }
+
+        #multi-view img {
+            margin: 0 5px;
+        }
+    </style>
+</head>
+<body>
+<div class="layui-tab">
+    <ul class="layui-tab-title">
+        <li class="layui-this">表单-单文件上传</li>
+        <li>表单-多文件上传</li>
+        <li>Ajax异步-单文件上传</li>
+        <li>Ajax异步-多文件上传</li>
+    </ul>
+    <div class="layui-tab-content">
+        <div class="layui-tab-item layui-show">
+            <form class="layui-form" action="/upload/avatar" method="post" enctype="multipart/form-data">
+                <input type="hidden" name="_method" value="put">
+                <div class="layui-form-item">
+                    <input type="file" name="avatar" accept="image/jpeg,image/png">
+                </div>
+                <div class="layui-form-item">
+                    <button type="submit" class="layui-btn">上传头像</button>
+                </div>
+            </form>
+        </div>
+        <div class="layui-tab-item">
+            <form class="layui-form" action="/upload/image" method="post" enctype="multipart/form-data">
+                <input type="hidden" name="_method" value="put">
+                <div class="layui-form-item">
+                    <input type="file" multiple="multiple" name="images" accept="image/jpeg,image/png">
+                </div>
+                <div class="layui-form-item">
+                    <button type="submit" class="layui-btn">上传图片</button>
+                </div>
+            </form>
+        </div>
+        <div class="layui-tab-item">
+            <button type="button" class="layui-btn" id="single">
+                <i class="layui-icon">&#xe67c;</i>选择图片
+            </button>
+            <p style="margin: 10px">
+                <img id="single-view" src="" alt="" width="250">
+            </p>
+            <p>
+                <button type="button" id="single-submit" class="layui-btn">点击上传</button>
+            </p>
+        </div>
+        <div class="layui-tab-item">
+            <button type="button" class="layui-btn" id="multi">
+                <i class="layui-icon">&#xe67c;</i>选择图片
+            </button>
+            <p id="multi-view">
+            </p>
+            <p>
+                <button type="button" id="multi-submit" class="layui-btn">点击上传</button>
+            </p>
+        </div>
+    </div>
+</div>
+<form class="layui-form" action="/upload/avatar">
+
+</form>
+<script src="https://lib.baomitu.com/layui/2.5.7/layui.all.min.js"></script>
+<script>
+    //注意：选项卡 依赖 element 模块，否则无法进行功能性操作
+    layui.use(['element', 'upload', 'layer', 'jquery'], function () {
+        const element = layui.element;
+        const upload = layui.upload;
+        const layer = layui.layer;
+        const $ = layui.jquery;
+
+        //单文件上传实例
+        var uploadInst = upload.render({
+            elem: '#single',
+            url: '/upload/avatar',
+            method: 'PUT', //设置了没什么卵用
+            accept: 'images',
+            acceptMime: 'image/*',
+            exts: 'jpg|png',
+            field: 'avatar',
+            size: 4 * 1024,
+            auto: false,
+            bindAction: '#single-submit',
+            done: function (res) {
+                if (res.success) {
+                    layer.msg("上传成功！");
+                    console.log(res)
+                    $('#single-view').attr('src', res.path);
+                }
+            },
+            error: function () {
+
+            }
+        });
+
+
+        //多文件上传实例，它这个是一条一条上传，不是在一起上传，调用单文件上传接口就行了
+        var uploadInst = upload.render({
+            elem: '#multi',
+            url: '/upload/avatar',
+            method: 'PUT', //设置了没什么卵用
+            accept: 'images',
+            acceptMime: 'image/*',
+            exts: 'jpg|png',
+            field: 'avatar',
+            multiple: true,
+            size: 4 * 1024,
+            auto: false,
+            bindAction: '#multi-submit',
+            done: function (res, index, upload) {
+                if (res.success) {
+                    console.log(index)
+                    $('#multi-view').append(`<img src="${res.path}" width="250">`)
+                }
+            },
+            error: function () {
+
+            }
+        });
+    });
+</script>
+</body>
+</html>

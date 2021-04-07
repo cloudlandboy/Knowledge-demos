@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>主页</title>
+    <link rel="stylesheet" href="https://unpkg.com/element-ui@2.15.0/lib/theme-chalk/index.css">
+    <script src="https://unpkg.com/vue@2.6.12/dist/vue.js"></script>
+    <script src="https://unpkg.com/element-ui@2.15.0/lib/index.js"></script>
+    <script src="https://unpkg.com/vue-router@3.5.1/dist/vue-router.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <style>
+        .menu a {
+            text-decoration: none;
+            display: inline-block;
+            padding: 0 20px;
+        }
+
+        .menu .el-menu-item {
+            padding: 0;
+        }
+    </style>
+</head>
+<body>
+<div id="head-app">
+    <el-header>
+        <el-menu background-color="#545c64" text-color="#fff" active-text-color="#ffd04b"
+                 class="menu" mode="horizontal">
+            <el-menu-item v-if="!login" index="login">
+                <a :href="paths.login">登录</a>
+            </el-menu-item>
+            <el-menu-item v-if="!login" index="register">
+                <a :href="paths.register">注册</a>
+            </el-menu-item>
+            <el-menu-item v-if="login" index="userInfo">
+                <a :href="paths.userInfo">欢迎你，{{user.username}}!</a>
+                <el-avatar :src="user.avatar" class="avatar"></el-avatar>
+            </el-menu-item>
+            <el-menu-item v-if="login" index="logout">
+                <a href="javascript:;" @click="logout">退出</a>
+            </el-menu-item>
+            <el-menu-item index="userList">
+                <a :href="paths.userList">用户列表</a>
+            </el-menu-item>
+            <el-menu-item index="roleList">
+                <a :href="paths.roleList">角色列表</a>
+            </el-menu-item>
+            <el-menu-item idenx="permissionList">
+                <a :href="paths.permissionList">权限列表</a>
+            </el-menu-item>
+        </el-menu>
+    </el-header>
+</div>
+<script>
+    new Vue({
+        el: '#head-app',
+        data: {
+            login: false,
+            user: {
+                username: '',
+                avatar: ''
+            },
+            paths: {
+                login: '/shiro-springboot/login',
+                register: '/shiro-springboot/register',
+                userInfo: '/shiro-springboot/loginUserInfo#userInfo',
+                userList: '/shiro-springboot/admin/user/users#userList',
+                roleList: '/shiro-springboot/admin/role/roles#roleList',
+                permissionList: '/shiro-springboot/admin/permission/permissions#permissionList'
+            }
+        },
+        methods: {
+            logout() {
+                location.href = "/shiro-springboot/logout"
+            }
+        },
+        beforeMount() {
+            axios.get('/shiro-springboot/loginInfo').then(res => {
+                if (res.status == 200) {
+                    this.login = true;
+                    this.user.username = res.data.username;
+                    this.user.avatar = res.data.avatar + this.user.username;
+                }
+            })
+        }
+    });
+</script>
+</body>
+</html>

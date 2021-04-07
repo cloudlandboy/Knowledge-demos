@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="dddd"></title>
+</head>
+<body>
+<ul>
+    <li th:each="num:${data}" th:text="${num}"></li>
+</ul>
+</body>
+</html>

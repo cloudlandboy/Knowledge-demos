@@ -1,0 +1,39 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /shiro-springboot
+spring:
+  application:
+    name: demo-shiro-springboot
+  datasource:
+    username: root
+    password: root
+    url: jdbc:mysql://localhost:3306/shiro
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  freemarker:
+    template-loader-path: classpath:/templates/ftl/
+    suffix: .ftl
+  aop:
+    proxy-target-class: true
+mybatis:
+  configuration:
+    map-underscore-to-camel-case: true
+shiro:
+  cache:
+    cache-manager-config-file: classpath:shiro-ehcache.xml
+    authentication-cache-name: authenticationCache
+    authorization-cache-name: authorizationCache
+    password-retry-cache-name: passwordRetryCache
+    active-sessions-cache-name: shiro-activeSessionCache
+  session-id-cookie:
+    name: sid
+    max-age: -1
+  remember-me-cookie:
+    name: rid
+    max-age: 2592000 # 30天
+  session-validation-scheduler-interval: 300000 # 5分钟
+  filter-chain-definition-map:
+    "[/login]": authc
+    "[/logout]": logout
+    "[/admin/user/users]": anon
+    "[/admin/**]": user,roles[admin]

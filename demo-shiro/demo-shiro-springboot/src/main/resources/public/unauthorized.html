@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>没有权限</title>
+    <style>
+    </style>
+</head>
+<body>
+对不起！你没有权限操作该资源！<a href="/shiro-springboot" class="btn">返回主页 (<span id="time">5</span>)</a>
+</body>
+<script>
+    var time = 5;
+    setInterval(() => {
+        if (time <= 0) {
+            location.href = "/shiro-springboot";
+            return;
+        }
+        document.querySelector("#time").innerHTML = --time + '';
+    }, 1000);
+</script>
+</html>

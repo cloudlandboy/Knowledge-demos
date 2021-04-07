@@ -1,0 +1,25 @@
+## 各种案例
+
+- `demo-aop`：面向切面编程aop
+  - demo-aop-proxy：动态代理
+  - demo-aop-spring：spring-aop
+- demo-rabbitmq：rabbitmq消息队列
+- demo-shiro：权限管理Shiro框架
+  - demo-shiro-basic：基础部分
+  - demo-shiro-spring：与spring整合
+  - demo-shiro-springboot：与springboot整合
+- demo-spring：spring相关
+  - demo-spring-web-hibernate：hibernate与spring整合
+- demo-springboot：springboot以及整合其他框架
+  - demo-spring-boot-cors：springboot中解决跨域
+  - demo-spring-boot-devtools：热部署
+  - demo-springboot-file-upload：文件上传
+  - demo-springboot-h2db：嵌入式数据库h2Database
+  - demo-springboot-task：异步，定时任务
+- demo-springcloud：springcloud微服务系列
+  - demo-springcloud-httpclient：使用HttpClient远程调用
+  - demo-springcloud-microService-simulation：微服务场景模拟，RestTemplate远程调用
+  - demo-springcloud-helloWorld：初识SpringCloud
+  - demo-springcloud-ribbon：负载均衡Ribbon
+  - demo-springcloud-feign：Feign客户端
+  - demo-springcloud-zuul：zuul网关

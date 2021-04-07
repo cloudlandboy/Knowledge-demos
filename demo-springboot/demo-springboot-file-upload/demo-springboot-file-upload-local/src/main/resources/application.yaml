@@ -1,0 +1,17 @@
+server:
+  port: 8080
+spring:
+  application:
+    name: demo-springboot-file-upload
+  servlet:
+    multipart:
+      max-file-size: 4MB #限制文件上传的大小
+      max-request-size: 100MB #最大请求大小（默认10MB），当上传文件大小超过该值时会导致触发多次MaxUploadSizeExceededException
+
+  mvc:
+    hiddenmethod:
+      filter:
+        enabled: true #开启mvc的HiddenHttpMethodFilter，以便可以表单可以发送PUT、DELETE等请求
+upload:
+  avatarSavePath: /uploads/avatar/
+  allowAvatarFileType: jpg,png

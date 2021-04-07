@@ -1,0 +1,28 @@
+server:
+  port: 20001
+spring:
+  application:
+    name: demo-springcloud-zuul-gateway
+eureka:
+  client:
+    fetch-registry: true
+    register-with-eureka: true
+    registry-fetch-interval-seconds: 10
+    service-url:
+      defaultZone: http://127.0.0.1:10001/eureka
+  instance:
+    instance-id: ${spring.application.name}:${server.port}
+zuul:
+  routes:
+    service-user: # 路由id，随意写（一般为服务名:DEMO-SPRINGCLOUD-ZUUL-SERVICE-USER）
+      path: /user/**  # 路由的前缀
+      url: http://127.0.0.1:9001 # 映射路径对应的实际url地址
+      stripPrefix: false #是否删除此路由的前缀，默认true，如果为true查询用户的路径就为：/user/user/{id}
+    service-search:
+      path: /search/**
+      # 通过服务名称来访问，Zuul已经集成了Ribbon的负载均衡功能，如果同一服务有多个实例的话，使用url写死了就不合理
+      serviceId: DEMO-SPRINGCLOUD-ZUUL-SERVICE-SEARCH
+      stripPrefix: false  # /search?q=java教程
+    # 简化的配置语法 serviceId=path，/message/email?msg=hello&receiver=594088@qq.com
+    DEMO-SPRINGCLOUD-ZUUL-SERVICE-MESSAGE: /message/**
+  prefix: /api  # 发起请求时，路径就要以/api开头

@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>测试跨域</title>
+    <style>
+        .btn-group {
+            margin: 10px;
+        }
+
+        pre {
+            padding: 10px;
+            background-color: #C7EDCC;
+        }
+
+        #info {
+            min-height: 400px;
+        }
+    </style>
+</head>
+
+<body>
+    <a href="#guide" onclick="document.querySelector('#guide').style.display='block'">怎么测试，必读</a>
+    <h3>请求方式 - 后端Origin - 前端withCredentials - 后端allowCredentials</h3>
+    <div id="app">
+        <div class="btn-group">
+            <h4>使用@CrossOrigin注解</h4>
+            <p>
+                请选择你当前后端配置的allowCredentials（一般默认是false）：
+                <select v-model="CrossOrigin.allowCredentials">
+                    <option v-for="option in options" v-bind:value="option">{{option}}</option>
+                </select>
+            </p>
+            <button onclick="request('/anno/m1','get')">get - 默认 - false -
+                {{CrossOrigin.allowCredentials?'后端允许cookie':'后端不允许cookie'}}</button>
+            <button onclick="request('/anno/m1','get',true)">get - 默认 - true -
+                {{CrossOrigin.allowCredentials?'后端允许cookie':'后端不允许cookie'}}</button>
+            <button onclick="request('/anno/m2','put')">put - 默认 - false -
+                {{CrossOrigin.allowCredentials?'后端允许cookie':'后端不允许cookie'}}</button>
+            <button onclick="request('/anno/m2','put',true)">put - 默认 - true -
+                {{CrossOrigin.allowCredentials?'后端允许cookie':'后端不允许cookie'}}</button>
+        </div>
+        <div class="btn-group">
+            <h4>WebMvcConfigurer的addCorsMappings方法</h4>
+            <p>
+                请选择你当前后端配置的allowCredentials（一般默认是false）：
+                <select v-model="WebMvcConfigurer.allowCredentials">
+                    <option v-for="option in options" v-bind:value="option">{{option}}</option>
+                </select>
+            </p>
+            <button onclick="request('/registry/m1','get')">get - 默认 - false -
+                {{WebMvcConfigurer.allowCredentials?'后端允许cookie':'后端不允许cookie'}}</button>
+            <button onclick="request('/registry/m1','get',true)">get - 默认 - true -
+                {{WebMvcConfigurer.allowCredentials?'后端允许cookie':'后端不允许cookie'}}</button>
+            <button onclick="request('/registry/m2','put')">put - 默认 - false -
+                {{WebMvcConfigurer.allowCredentials?'后端允许cookie':'后端不允许cookie'}}</button>
+            <button onclick="request('/registry/m2','put',true)">put - 默认 - true -
+                {{WebMvcConfigurer.allowCredentials?'后端允许cookie':'后端不允许cookie'}}</button>
+        </div>
+        <div class="btn-group">
+            <h4>使用CorsFilter</h4>
+            <p>
+                请选择你当前后端配置的allowCredentials（一般默认是false）：
+                <select v-model="CorsFilter.allowCredentials">
+                    <option v-for="option in options" v-bind:value="option">{{option}}</option>
+                </select>
+            </p>
+            <button onclick="request('/filter/m1','get')">get - * - false -
+                {{CorsFilter.allowCredentials?'后端允许cookie':'后端不允许cookie'}}</button>
+            <button onclick="request('/filter/m1','get',true)">get - * - true -
+                {{CorsFilter.allowCredentials?'后端允许cookie':'后端不允许cookie'}}</button>
+            <button onclick="request('/filter/m2','put')">put - * - false -
+                {{CorsFilter.allowCredentials?'后端允许cookie':'后端不允许cookie'}}</button>
+            <button onclick="request('/filter/m2','put',true)">put - * - true -
+                {{CorsFilter.allowCredentials?'后端允许cookie':'后端不允许cookie'}}</button>
+        </div>
+        <div class="btn-group">
+            <h4>未配置</h4>
+            <button onclick="request('/none/m1','get')">get - null - false - null</button>
+            <button onclick="request('/none/m1','get',true)">get - null - true - null</button>
+            <button onclick="request('/none/m2','put')">put - null - false - null</button>
+            <button onclick="request('/none/m2','put',true)">put - null - true - null</button>
+        </div>
+    </div>
+    <div>
+        <pre id="info"></pre>
+    </div>
+    <div id="guide" style="display: none;">
+        <h1>使用其他服务器访问此HTML，使其和8080端口不一致达到跨域效果</h1>
+        <h2>例如使用vscode安装<b>Live Server</b>插件，打开此HTML使用 <em>Ctrl+L 和 Ctrl+O</em> 快捷键运行</h2>
+        <h2>修改hosts文件，添加 test.com域名映射</h2>
+        <pre>
+        # My hosts
+        127.0.0.1 test.com
+    </pre>
+        <h2>然后将地址栏中的 127.0.0.1:5500 改为 test.com:5500</h2>
+        <h2>控制台查看是否跨域</h2>
+    </div>
+    <script src="https://cdn.bootcdn.net/ajax/libs/axios/0.21.1/axios.min.js"></script>
+    <script src="https://cdn.bootcdn.net/ajax/libs/js-beautify/1.13.5/beautify.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+    <script>
+        axios.defaults.baseURL = "http://test.com:8080"
+        if (location.hostname != "test.com") {
+            location.hostname = "test.com";
+        }
+        function setCookie(cname, cvalue, exdays) {
+            var d = new Date();
+            d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
+            var expires = "expires=" + d.toGMTString();
+            document.cookie = cname + "=" + cvalue + "; " + expires;
+        }
+        setCookie("test-cookie", "test-cors", 1);
+
+
+
+        new Vue({
+            el: "#app",
+            data: {
+                CrossOrigin: {
+                    allowCredentials: false,
+                },
+                WebMvcConfigurer: {
+                    allowCredentials: false,
+                },
+                CorsFilter: {
+                    allowCredentials: false,
+
+                },
+                options: [false, true]
+            }
+        });
+
+        function request(path, method, withCredentials) {
+            document.querySelector('#info').innerHTML = method.toLocaleUpperCase() + "\t" + axios.defaults.baseURL + path + "\n\n";
+            axios({
+                url: path,
+                method,
+                withCredentials: !!withCredentials,
+                headers: {
+                    "test-header": "test-header-value"
+                }
+            }).then(res => {
+                let text = js_beautify(JSON.stringify(res));
+                document.querySelector('#info').innerHTML += text;
+            }).catch(error => {
+                let text = js_beautify(JSON.stringify(error));
+                document.querySelector('#info').innerHTML += text;
+            })
+        }
+
+
+        // function changeAllow() {
+        //     axios.post("/filter//change_allowed_credentials", {}, { params: { allowed: true } })
+        // }
+    </script>
+</body>
+
+</html>

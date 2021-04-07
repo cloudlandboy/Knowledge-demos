@@ -1,0 +1,35 @@
+package cn.clboy.demo.spring.bean.lifecycle.pojo;
+
+import org.springframework.stereotype.Component;
+
+@Component
+public class Animal {
+
+    private String type;
+    private String name;
+    private Integer weight;
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public Integer getWeight() {
+        return weight;
+    }
+
+    public void setWeight(Integer weight) {
+        this.weight = weight;
+    }
+}

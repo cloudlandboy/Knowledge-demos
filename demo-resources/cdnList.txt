@@ -1,0 +1,15 @@
+#layui
+
+
+# vue
+<script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.min.js"></script>
+
+# elementUI
+<link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+
+# js-beautify格式化json，调用 js_beautify(json字符串)
+<script src="https://cdn.bootcdn.net/ajax/libs/js-beautify/1.13.5/beautify.min.js"></script>
+
+# dom元素转图片
+<script src="https://cdn.bootcdn.net/ajax/libs/dom-to-image/2.6.0/dom-to-image.min.js"></script>

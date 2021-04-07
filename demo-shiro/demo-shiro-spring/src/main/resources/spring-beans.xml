@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <import resource="classpath:spring-dao.xml"/>
+
+    <!-- 配置密码生成器 -->
+    <bean name="passwordHelper" class="cn.clboy.demo.shiro.spring.utils.PasswordHelper">
+        <property name="hashAlgorithmName" value="#{hashProperties.hashAlgorithmName}"/>
+        <property name="hashIterations" value="#{hashProperties.hashIterations}"/>
+    </bean>
+
+    <bean name="userService" class="cn.clboy.demo.shiro.spring.service.impl.UserServiceImpl">
+        <property name="passwordHelper" ref="passwordHelper"/>
+        <property name="userMapper" ref="userMapper"/>
+    </bean>
+
+    <bean name="roleService" class="cn.clboy.demo.shiro.spring.service.impl.RoleServiceImpl">
+        <property name="roleMapper" ref="roleMapper"/>
+    </bean>
+
+    <bean name="permissionService" class="cn.clboy.demo.shiro.spring.service.impl.PermissionServiceImpl">
+        <property name="permissionMapper" ref="permissionMapper"/>
+    </bean>
+</beans>

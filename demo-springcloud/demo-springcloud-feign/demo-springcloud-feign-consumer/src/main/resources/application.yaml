@@ -1,0 +1,20 @@
+server:
+  port: 8081
+spring:
+  application:
+    name: demo-springcloud-feign-consumer
+  cloud:
+    # 开启Spring Cloud的重试功能，默认就是true
+    loadbalancer:
+      retry:
+        enabled: true
+eureka:
+  client:
+    service-url:
+      defaultZone: http://127.0.0.1:10001/eureka
+  instance:
+    instance-id: ${spring.application.name}:${server.port}
+feign:
+  hystrix:
+    # 开启Feign的熔断功能,默认false
+    enabled: true

@@ -1,0 +1,81 @@
+<link rel="stylesheet" href="https://unpkg.com/element-ui@2.15.0/lib/theme-chalk/index.css">
+<script src="https://unpkg.com/vue@2.6.12/dist/vue.js"></script>
+<script src="https://unpkg.com/element-ui@2.15.0/lib/index.js"></script>
+<script src="https://unpkg.com/vue-router@3.5.1/dist/vue-router.js"></script>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<style>
+    .menu a {
+        text-decoration: none;
+        display: inline-block;
+        padding: 0 20px;
+    }
+
+    .menu .el-menu-item {
+        padding: 0;
+    }
+</style>
+<div id="head-app">
+    <el-header>
+        <el-menu background-color="#545c64" text-color="#fff" active-text-color="#ffd04b"
+                 class="menu" mode="horizontal" :default-active="navActive">
+            <el-menu-item v-if="!login" index="login">
+                <a :href="paths.login">登录</a>
+            </el-menu-item>
+            <el-menu-item v-if="!login" index="register">
+                <a :href="paths.register">注册</a>
+            </el-menu-item>
+            <el-menu-item v-if="login" index="userInfo">
+                <a :href="paths.userInfo">欢迎你，{{user.username}}!</a>
+                <el-avatar :src="user.avatar" class="avatar"></el-avatar>
+            </el-menu-item>
+            <el-menu-item v-if="login" index="logout">
+                <a href="javascript:;" @click="logout">退出</a>
+            </el-menu-item>
+            <el-menu-item index="userList">
+                <a :href="paths.userList">用户列表</a>
+            </el-menu-item>
+            <el-menu-item index="roleList">
+                <a :href="paths.roleList">角色列表</a>
+            </el-menu-item>
+            <el-menu-item index="permissionList">
+                <a :href="paths.permissionList">权限列表</a>
+            </el-menu-item>
+        </el-menu>
+    </el-header>
+</div>
+<script>
+    new Vue({
+        el: '#head-app',
+        data: {
+            navActive: '',
+            login: false,
+            user: {
+                username: '',
+                avatar: ''
+            },
+            paths: {
+                login: '/shiro-spring/login',
+                register: '/shiro-spring/register',
+                userInfo: '/shiro-spring/loginUserInfo#userInfo',
+                userList: '/shiro-spring/admin/user/users#userList',
+                roleList: '/shiro-spring/admin/role/roles#roleList',
+                permissionList: '/shiro-spring/admin/permission/permissions#permissionList'
+            }
+        },
+        methods: {
+            logout() {
+                location.href = "/shiro-spring/logout"
+            }
+        },
+        beforeMount() {
+            this.navActive = location.hash.substring(1);
+            axios.get('/shiro-spring/loginInfo').then(res => {
+                if (res.status == 200) {
+                    this.login = true;
+                    this.user.username = res.data.username;
+                    this.user.avatar = res.data.avatar + this.user.username;
+                }
+            })
+        }
+    });
+</script>

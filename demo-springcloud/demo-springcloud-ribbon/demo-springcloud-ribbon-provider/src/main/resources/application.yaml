@@ -1,0 +1,19 @@
+server:
+  port: ${SPORT:9001}
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/demo-springcloud-httpclient
+    username: root
+    password: root
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  application:
+    name: demo-springcloud-ribbon-provider
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://127.0.0.1:10001/eureka
+  instance:
+    # 默认是spring.application.name
+    instance-id: ${spring.application.name}:${server.port}
