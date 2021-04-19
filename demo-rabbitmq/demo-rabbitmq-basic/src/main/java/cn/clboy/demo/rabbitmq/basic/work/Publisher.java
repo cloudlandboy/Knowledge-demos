@@ -1,4 +1,4 @@
-package cn.clboy.demo.rabbitmq.basic.basic;
+package cn.clboy.demo.rabbitmq.basic.work;
 
 
 import cn.clboy.demo.rabbitmq.basic.utils.RabbitMQUtil;
@@ -15,7 +15,6 @@ import java.util.concurrent.TimeoutException;
  */
 public class Publisher {
 
-
     public static void main(String[] args) {
         try (
                 //获取连接
@@ -23,10 +22,9 @@ public class Publisher {
                 //创建通道
                 Channel channel = connection.createChannel();
         ) {
-            // 声明一个队列(幂等的,只有当它不存在时才会被创建).参数：(队列名, 是否持久化,队列是否独占此连接,队列不再使用时是否自动删除此队列,队列参数)
-            channel.queueDeclare(RabbitMQUtil.BASIC_QUEUE, true, false, false, null);
+            // 声明一个队列(幂等的,只有当它不存在时才会被创建)
+            channel.queueDeclare(RabbitMQUtil.WORK_QUEUE, true, false, false, null);
 
-            String message = LocalDateTime.now().format(DateTimeFormatter.ofPattern("YYYY-MM-dd HH:mm:ss")) + "@hello rabbitMQ!";
 
             /**
              * Exchange的名称，如果没有指定，则使用Default Exchange
@@ -34,8 +32,12 @@ public class Publisher {
              * props:消息包含的属性
              * body：消息体
              */
-            channel.basicPublish("", RabbitMQUtil.BASIC_QUEUE, null, message.getBytes());
-            System.out.println(Publisher.class.getName() + "：消息已经发送");
+            for (int i = 0; i < 20; i++) {
+                String pre = i + "-->";
+                String message = pre + LocalDateTime.now().format(DateTimeFormatter.ofPattern("YYYY-MM-dd HH:mm:ss")) + "@hello rabbitMQ!";
+                channel.basicPublish("", RabbitMQUtil.WORK_QUEUE, null, message.getBytes());
+                System.out.println(pre + Publisher.class.getName() + "：消息已经发送");
+            }
         } catch (TimeoutException | IOException e) {
             e.printStackTrace();
         }

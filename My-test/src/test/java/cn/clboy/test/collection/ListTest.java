@@ -48,9 +48,9 @@ public class ListTest {
         char[] arr1 = AELEBYSTRING.toCharArray();
         char[] arr2 = BELEBYSTRING.toCharArray();
         a = new ArrayList<Character>();
-        ArrayUtil.charArrayToCollection(arr1, a);
+        ArrayUtil.arrayToCollection(arr1, a);
         b = new ArrayList<Character>();
-        ArrayUtil.charArrayToCollection(arr2, b);
+        ArrayUtil.arrayToCollection(arr2, b);
 
         System.out.println(a);
         System.out.println(b);

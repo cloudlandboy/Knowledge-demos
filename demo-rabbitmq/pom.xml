@@ -5,6 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <modules>
         <module>demo-rabbitmq-basic</module>
+        <module>demo-rabbitmq-springboot</module>
     </modules>
 
     <!-- 利用springboot统一依赖版本 -->
@@ -18,5 +19,4 @@
     <artifactId>demo-rabbitmq</artifactId>
     <version>1.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
-
 </project>

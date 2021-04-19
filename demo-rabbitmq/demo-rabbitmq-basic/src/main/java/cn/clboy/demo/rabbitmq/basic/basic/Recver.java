@@ -15,7 +15,7 @@ public class Recver {
     public static void main(String[] args) throws IOException, TimeoutException {
         Connection connection = RabbitMQUtil.getConnection();
         Channel channel = connection.createChannel();
-        channel.queueDeclare(Publisher.QUEUE_NAME, true, false, false, null);
+        channel.queueDeclare(RabbitMQUtil.BASIC_QUEUE, true, false, false, null);
         handAck(channel);
     }
 
@@ -27,7 +27,7 @@ public class Recver {
      */
     public static void autoAck(Channel channel) throws IOException {
         // 监听队列，第二个参数：是否自动进行消息确认。
-        channel.basicConsume(Publisher.QUEUE_NAME, true, new DefaultConsumer(channel) {
+        channel.basicConsume(RabbitMQUtil.BASIC_QUEUE, true, new DefaultConsumer(channel) {
 
             /**
              * 消费者接收消息调用此方法
@@ -54,7 +54,7 @@ public class Recver {
      */
     public static void handAck(Channel channel) throws IOException {
         // 监听队列，第二个参数：是否自动进行消息确认。
-        channel.basicConsume(Publisher.QUEUE_NAME, false, new DefaultConsumer(channel) {
+        channel.basicConsume(RabbitMQUtil.BASIC_QUEUE, false, new DefaultConsumer(channel) {
 
             /**
              * 消费者接收消息调用此方法
@@ -68,9 +68,8 @@ public class Recver {
             public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
                 String message = new String(body);
                 System.out.println(Recver.class.getName() + "- 手动应答 - 收到消息：" + message);
-                System.out.println("处理完成：查看后台消息任然存在，再次运行还会监听到!");
                 //手动ack
-                this.getChannel().basicAck(envelope.getDeliveryTag(), false);
+                //this.getChannel().basicAck(envelope.getDeliveryTag(), false);
             }
         });
     }

@@ -9,6 +9,14 @@ import java.util.concurrent.TimeoutException;
 
 public class RabbitMQUtil {
 
+    public static final String BASIC_QUEUE = "demo_basic_queue";
+    public static final String WORK_QUEUE = "demo_work_queue";
+
+    public static final String FANOUT_EXCHANGE = "demo_fanout_exchange";
+    public static final String DIRECT_EXCHANGE = "demo_direct_exchange";
+    public static final String TOPIC_EXCHANGE = "demo_topic_exchange";
+
+
     public static Connection getConnection() throws IOException, TimeoutException {
         //定义连接工厂,设置连接信息
         ConnectionFactory connectionFactory = new ConnectionFactory();
