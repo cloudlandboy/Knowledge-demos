@@ -6,7 +6,7 @@ import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.connection.CorrelationData;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.rabbit.listener.api.RabbitListenerErrorHandler;
-import org.springframework.amqp.rabbit.listener.exception.ListenerExecutionFailedException;
+import org.springframework.amqp.rabbit.support.ListenerExecutionFailedException;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.beans.factory.InitializingBean;
@@ -76,7 +76,7 @@ public class MQConfig implements InitializingBean {
          * 发布者确认回调,通过实现 ConfirmCallback 接口，消息发送到 Broker 后触发回调，确认消息是否到达 Broker 服务器
          * 也就是只确认是否正确到达 Exchange 中
          *
-         * 每一条发出的消息都会调用ConfirmCallback；
+         * 每一条发出的消息都会调用ConfirmCallback(测试springboot2.1版本只要发送消息就会调用，2.3版本只有发送失败才调用)；
          *
          * 需要在配置文件中开启，publisher-confirms
          */
