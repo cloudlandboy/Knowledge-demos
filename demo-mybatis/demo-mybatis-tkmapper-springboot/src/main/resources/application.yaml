@@ -1,0 +1,25 @@
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: root
+    password: root
+    url: jdbc:mysql://127.0.0.1:3306/demo-mybatis?useUnicode=true&characterEncoding=UTF-8&useSSL=false&autoReconnect=true&failOverReadOnly=false&serverTimezone=GMT%2B8
+    initialization-mode: always
+    schema:
+      - "classpath:sqls/department-schema.sql"
+      - "classpath:sqls/employee-schema.sql"
+    data:
+      - "classpath:sqls/department-data.sql"
+      - "classpath:sqls/employee-data.sql"
+mybatis:
+  configuration:
+    use-actual-param-name: true
+  type-aliases-package: cn.clboy.demo.tk.mybatis.springboot.pojo
+  mapper-locations: classpath:mappers/*.xml
+mapper:
+  not-empty: true #insertSelective 和 updateByPrimaryKeySelective 中，是否判断字符串类型 !=''
+pagehelper:
+  reasonable: true
+logging:
+  level:
+    cn.clboy.demo.tk.mybatis.springboot.mapper: trace # 打印sql日志

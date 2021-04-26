@@ -1,0 +1,23 @@
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: root
+    password: root
+    url: jdbc:mysql://127.0.0.1:3306/demo-mybatis?useUnicode=true&characterEncoding=UTF-8&useSSL=false&autoReconnect=true&failOverReadOnly=false&serverTimezone=GMT%2B8
+    initialization-mode: always
+    schema:
+      - "classpath:sqls/department-schema.sql"
+      - "classpath:sqls/employee-schema.sql"
+    data:
+      - "classpath:sqls/department-data.sql"
+      - "classpath:sqls/employee-data.sql"
+mybatis:
+  configuration:
+    use-actual-param-name: true
+  mapper-locations: classpath:mappers/*.xml
+  type-aliases-package: cn.clboy.demo.mybatis.springboot.pojo
+pagehelper:
+  reasonable: true #分页合理化，pageNum<=0 时会查询第一页，pageNum>pages（超过总数时），会查询最后一页，默认false
+logging:
+  level:
+    cn.clboy.demo.mybatis.springboot.mapper: trace # 打印sql日志

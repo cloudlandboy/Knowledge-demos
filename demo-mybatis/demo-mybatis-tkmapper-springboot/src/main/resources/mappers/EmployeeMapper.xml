@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.clboy.demo.tk.mybatis.springboot.mapper.EmployeeMapper">
+    <resultMap id="BaseResultMap" type="employee">
+        <id column="employee_id" jdbcType="INTEGER" property="id"/>
+        <result column="employee_lastName" jdbcType="VARCHAR" property="lastname"/>
+        <result column="employee_email" jdbcType="VARCHAR" property="email"/>
+        <result column="employee_gender" jdbcType="INTEGER" property="gender"/>
+        <result column="employee_d_id" jdbcType="INTEGER" property="dId"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+        employee.id as employee_id, employee.lastName as employee_lastName, employee.email as employee_email,
+    employee.gender as employee_gender, employee.d_id as employee_d_id
+    </sql>
+
+    <!-- 添加自定义的方法 -->
+    <resultMap id="deepResultMap" type="employee" extends="BaseResultMap">
+        <association property="department" javaType="department"
+                     resultMap="cn.clboy.demo.tk.mybatis.springboot.mapper.DepartmentMapper.BaseResultMap">
+        </association>
+    </resultMap>
+    <select id="selectDeepByPrimaryKey" resultMap="deepResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        ,
+        <include refid="cn.clboy.demo.tk.mybatis.springboot.mapper.DepartmentMapper.Base_Column_List"/>
+        FROM employee employee,
+        department department
+        WHERE employee.id = #{id} AND employee.d_id=department.id
+    </select>
+</mapper>
