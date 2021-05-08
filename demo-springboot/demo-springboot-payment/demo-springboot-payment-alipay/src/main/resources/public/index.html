@@ -1,0 +1,427 @@
+<!doctype html>
+<html lang="zh">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>商品列表</title>
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <style>
+        .goods-item {
+            text-align: center;
+            background-color: #FFF;
+            padding: 10px 0;
+            margin: 10px 0;
+        }
+
+        .cart,
+        .orderView {
+            width: 120px;
+            height: 34px;
+            background-color: #fff;
+            text-align: center;
+            line-height: 34px;
+            border-color: #eee;
+            float: right;
+            font-size: 12px;
+            cursor: pointer;
+            color: #e1251b;
+            user-select: none;
+            margin-right: 20px;
+        }
+
+        .el-icon-shopping-cart-2 {
+            font-weight: bold;
+        }
+
+        .el-loading-spinner > .el-icon-loading,
+        .el-loading-spinner > .el-loading-text {
+            color: #FFFFFF;
+        }
+
+        .pay-box {
+            text-align: center;
+        }
+
+        .pay-box img {
+            margin: auto;
+        }
+
+        .orderView {
+            text-decoration: none;
+            margin-right: -20px;
+        }
+    </style>
+</head>
+
+<body style="background-color: #f4f4f4;opacity: 0">
+<div id="app">
+    <el-container>
+        <el-header>
+            <h1>支付宝商城</h1>
+        </el-header>
+        <el-main>
+            <el-row :gutter="20">
+                <el-col :xs="12" :sm="14" :md="18" :lg="20" :xl="21">
+                    <a href="/orders.html" target="_blank" class="orderView">查看系统订单</a>
+                </el-col>
+                <el-col :xs="12" :sm="10" :md="6" :lg="4" :xl="3">
+                    <el-badge :value="cart.count" class="cart">
+                        <div @click="showCart">
+                            <i class="el-icon-shopping-cart-2"></i>去结算
+                        </div>
+                    </el-badge>
+                </el-col>
+            </el-row>
+            <el-row :gutter="20">
+                <el-col :xs="12" :sm="8" :md="6" :lg="4" :xl="2" v-for="item in itemList">
+                    <div class="goods-item">
+                        <img :src="item.image" :alt="item.name" width="120" height="120">
+                        <p class="grid-content bg-purple">{{item.name}}</p>
+                        <p style="color: red">￥{{item.price / 1000}}</p>
+                        <el-button type="primary" @click="addToCart(item)">加入购物车</el-button>
+                    </div>
+                </el-col>
+            </el-row>
+        </el-main>
+    </el-container>
+
+    <div>
+        <el-dialog title="购物列表" :visible.sync="dialogTableVisible" width="80%">
+            <el-table :data="order.orderItems">
+                <el-table-column property="name" label="商品名"></el-table-column>
+                <el-table-column label="价格">
+                    <span style="color: #e1251b" slot-scope="scope">￥{{scope.row.price}}</span>
+                </el-table-column>
+                <el-table-column property="num" label="数量"></el-table-column>
+                <el-table-column label="小计">
+                    <span style="color: #e1251b" slot-scope="scope">￥{{scope.row.total}}</span>
+                </el-table-column>
+            </el-table>
+            <div style="padding-top: 15px;text-align: center">
+                <p>总计： <span style="color: #e1251b">￥{{order.price}}</span></p>
+                <el-button type="success" round @click="payHandle">点击支付</el-button>
+            </div>
+        </el-dialog>
+        <el-dialog custom-class="pay-box" :visible.sync="scanCodePayDialog" width="450px" :close-on-click-modal="false"
+                   :close-on-press-escape="false" @opened="refreshPayQrcode">
+            <p style="color: #e1251b">请在 3 分钟内进行扫码支付</p>
+            <div ref="scanCodePayQrcode">
+            </div>
+        </el-dialog>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script src="/qrcode.min.js"></script>
+<script>
+    Vue.config.devtools = true;
+    axios.defaults.baseURL = '/order';
+
+
+    class PayHelper {
+        constructor(vueInstance, orderStatusQueryApi) {
+            this.$vue = vueInstance;
+            this.orderStatusQueryApi = orderStatusQueryApi;
+            this.orderFinished = false;
+            this.queryLock = false;
+        };
+
+        platform = {
+            wxPay: {
+                scanCode: {
+                    api: '/pay/scan_code',
+                    intervalQuery: null,
+                    intervalQueryCount: 0,
+
+                    /**
+                     * @param _this
+                     * @param orderId
+                     * @param options
+                     * {
+                     *  qrCodeSuccess：获取到二维码链接后的回调
+                     *  interval：轮询订单状态时间间隔
+                     *  orderLiveTime：最长轮询时间，毫秒
+                     *  orderStatusQueryError：订单查询出错处理函数
+                     *  orderFinished：轮询中调用改函数，根据服务器返回的结果判断是否已收到回调并处理，返回boolean
+                     *  orderQueryDone：轮询完毕后的回调
+                     *  }
+                     */
+                    handle(_this, orderId, options) {
+                        this.intervalQueryCount = 0;
+                        _this.$vue.createLoading("等待支付二维码生成...");
+                        axios.post(this.api, {}, {
+                            params: {
+                                orderId: orderId
+                            }
+                        }).then(res => {
+                            res = res.data;
+                            if (res.success) {
+                                this.codeUrl = res.data;
+
+                                //生成二维码之后回调
+                                options.qrCodeSuccess(this.codeUrl);
+
+                                //轮询间隔
+                                this.interval = options.interval || 1000;
+                                //最大轮询时间,默认3分钟
+                                let orderLiveTime = options.orderLiveTime || 3
+                                this.maxCount = (1000 * 60 * orderLiveTime) / this.interval;
+
+                                //轮询获取订单状态
+                                this.intervalQuery = setInterval(() => {
+                                    this.intervalQueryCount++;
+                                    if (_this.orderFinished || this.intervalQueryCount >= this.maxCount) {
+                                        clearInterval(this.intervalQuery);
+                                        options.orderQueryDone && options.orderQueryDone({
+                                            orderFinished: _this.orderFinished,
+                                            timeOut: this.intervalQueryCount >= this.maxCount
+                                        });
+                                    }
+                                    _this.orderStatusQuery(orderId, options);
+                                }, this.interval);
+                            } else {
+                                _this.commonErrorHandle(options, "qrCodeError", res.message);
+                            }
+                        }).catch((err) => {
+                            _this.commonErrorHandle(options, "qrCodeError", err.message);
+                        });
+                    }
+                }
+            },
+            aliPay: {
+                pc: {
+                    api: 'order/pay/pc',
+                    handle(_this, orderId, options) {
+                        location.href = this.api + '?orderId=' + orderId;
+                    }
+                }
+            }
+        }
+
+        commonErrorHandle(options, type, msg) {
+            options[type] ? options[type](msg) : this.$vue.$message.error(msg || "出错了！");
+        }
+
+        orderStatusQuery(orderId, options) {
+            if (this.queryLock) {
+                return;
+            }
+            this.queryLock = true;
+            axios.get(this.orderStatusQueryApi, {
+                params: {
+                    orderId
+                }
+            }).then(res => {
+                this.queryLock = false;
+                res = res.data;
+                this.orderFinished = options.orderFinished(res);
+            }).catch((err) => {
+                this.queryLock = false;
+                this.commonErrorHandle(options, "orderStatusQueryError", err.message);
+            })
+        }
+
+        pay(platform, method, orderId, options) {
+            this.queryLock = false;
+            this.orderFinished = false;
+            this.currentPayMethod = this.platform[platform][method];
+            this.currentPayMethod.handle(this, orderId, options);
+        }
+    }
+
+    const app = new Vue({
+            el: '#app',
+            data: {
+                dialogTableVisible: false,
+                scanCodePayDialog: false,
+                priceEnlarge: true,
+                itemList: [ //价格是放大1000倍后的
+                    {id: 1, name: '商品A', price: '138290', image: 'https://i.postimg.cc/XYKtD7G4/1.jpg'},
+                    {id: 2, name: '商品B', price: '165780', image: 'https://i.postimg.cc/VNY2yQnM/2.png'},
+                    {id: 3, name: '商品C', price: '388990', image: 'https://i.postimg.cc/PrwgYMdL/3.jpg'},
+                    {id: 4, name: '商品D', price: '544230', image: 'https://i.postimg.cc/LXsdPKsR/4.jpg'},
+                    {id: 5, name: '商品E', price: '841990', image: 'https://i.postimg.cc/mr8JBXyn/5.jpg'},
+                    {id: 6, name: '商品F', price: '647230', image: 'https://i.postimg.cc/85X2BKFv/6.jpg'},
+                    {id: 7, name: '商品G', price: '137240', image: 'https://i.postimg.cc/J09SSs54/7.jpg'},
+                    {id: 8, name: '商品H', price: '1000000', image: 'https://i.postimg.cc/HnJfSw5h/8.jpg'},
+                    {id: 9, name: '商品I', price: '978620', image: 'https://i.postimg.cc/VNY2yQnM/2.png'},
+                    {id: 10, name: '商品J', price: '88880', image: 'https://i.postimg.cc/PrwgYMdL/3.jpg'},
+                    {id: 11, name: '商品K', price: '64990', image: 'https://i.postimg.cc/LXsdPKsR/4.jpg'},
+                ],
+                cart: {
+                    count: 0,
+                    items: {}
+                },
+                order: {
+                    price: 0,
+                    orderItems: []
+                },
+                selectorPay: {
+                    platform: 'aliPay',
+                    method: "pc"
+                },
+                qrCode: null,
+                payHelper: null
+            },
+            methods: {
+                addToCart(item) {
+                    this.cart.count++;
+                    const items = this.cart.items;
+                    if (items[item.id]) {
+                        items[item.id].num++;
+                        return;
+                    }
+                    items[item.id] = {
+                        num: 1,
+                        price: this.priceEnlarge ? item.price : item.price / 1000,
+                        name: item.name
+                    };
+                },
+                showCart() {
+                    if (this.cart.count < 1) {
+                        return;
+                    }
+                    this.updateOrder();
+                    this.dialogTableVisible = true;
+                },
+                payHandle() {
+                    this.createLoading("提交订单中...");
+                    axios.put('/', this.order).then(res => {
+                        // 关闭购物车
+                        this.dialogTableVisible = false;
+                        const orderId = res.data.id;
+                        this.$message.success('订单生已生成！');
+                        this.payHelper.pay(this.selectorPay.platform, this.selectorPay.method, orderId, {
+                            qrCodeSuccess(codeUrl) {
+                                app.closeLoading();
+                                app.resetOrder();
+                                app.resetCart();
+                                app.qrcodeUrl = codeUrl;
+                                app.scanCodePayDialog = true;
+                            },
+                            orderFinished(res) {
+                                if (res.data == 1) {
+                                    app.$message.success('支付完成！');
+                                    return true;
+                                }
+                            },
+                            orderQueryDone(result) {
+                                app.scanCodePayDialog = false;
+                                if (result.timeOut) {
+                                    app.$notify({
+                                        title: '提示',
+                                        message: '订单支付超时！',
+                                        duration: 0,
+                                        type: 'warning'
+                                    });
+                                }
+                            }
+                        })
+                    }).catch(this.commonCatch);
+                },
+                resetCart() {
+                    this.cart = {
+                        count: 0,
+                        items: {}
+                    }
+                }
+                ,
+                resetOrder() {
+                    this.order = {
+                        price: 0,
+                        orderItems: []
+                    };
+
+                }
+                ,
+                orderPriceFormat(enlarge) {
+                    //enlarge:true 放大1000倍，false：缩小1000倍
+                    if (enlarge === this.priceEnlarge) {
+                        return
+                    }
+                    this.priceEnlarge = enlarge;
+
+                    if (this.order.price) {
+                        enlarge ? this.order.price *= 1000 : this.order.price /= 1000;
+                    }
+
+                    for (const itemId in this.cart.items) {
+                        let item = this.cart.items[itemId];
+                        enlarge ? item.price *= 1000 : item.price /= 1000;
+                        enlarge ? item.total *= 1000 : item.total /= 1000;
+                    }
+                }
+                ,
+                updateOrder() {
+                    //放大价格利于计算
+                    this.orderPriceFormat(true);
+                    //重新生成订单
+                    this.resetOrder();
+                    for (const id in this.cart.items) {
+                        let item = this.cart.items[id];
+                        let total = item.num * item.price;
+                        this.order.price += total;
+                        item.total = total;
+                        this.order.orderItems.push(item);
+                    }
+                    // 还原价格显示
+                    this.orderPriceFormat(false);
+                }
+                ,
+                createLoading(text, spinner, bg) {
+                    this.closeLoading();
+                    this.loading = this.$loading({
+                        lock: true,
+                        text,
+                        spinner: spinner || 'el-icon-loading',
+                        background: bg || 'rgba(0, 0, 0, 0.4)'
+                    });
+                }
+                ,
+                closeLoading() {
+                    if (this.loading) {
+                        this.loading.close();
+                        this.loading = false;
+                    }
+                }
+                ,
+                commonCatch(message) {
+                    this.closeLoading();
+                    this.$message.error(message || '出错了！');
+                }
+                ,
+                refreshPayQrcode() {
+                    codeUrl = this.qrcodeUrl;
+                    if (this.qrCode) {
+                        this.qrCode.clear();
+                        this.qrCode.makeCode(codeUrl);
+                        return;
+                    }
+                    // 必须先显示dialog,不然获取不到元素
+                    this.qrCode = new QRCode(this.$refs.scanCodePayQrcode, {
+                        text: codeUrl,
+                        width: 300,
+                        height: 300,
+                        colorDark: "#000000",
+                        colorLight: "#ffffff",
+                        correctLevel: QRCode.CorrectLevel.H
+                    });
+                }
+            },
+            mounted() {
+                //防止插值闪烁
+                document.body.style.opacity = 1;
+                this.payHelper = new PayHelper(this, "/status")
+            }
+        })
+    ;
+
+
+</script>
+</body>
+
+</html>

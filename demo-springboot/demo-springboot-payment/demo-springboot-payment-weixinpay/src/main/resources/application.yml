@@ -1,0 +1,27 @@
+spring:
+  datasource:
+    platform: h2
+    # http://www.h2database.com/html/features.html#database_url
+    url: jdbc:h2:mem:demo-springboot-payment-weixinpay
+    driver-class-name: org.h2.Driver
+    username: root
+    password: root
+    initialization-mode: embedded #默认就是embedded
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect #数据库方言
+    show-sql: true #打印sql
+    hibernate:
+      ddl-auto: update
+  h2:
+    console:
+      enabled: true #开启h2的控制台，默认访问路径：/项目名/h2-console
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+weixin:
+  pay:
+    appid:
+    mch-id:
+    fee-type:
+    notify-url: http://local.clboy.cn/order/notify
+    private-key:

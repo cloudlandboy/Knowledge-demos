@@ -21,5 +21,8 @@
         <module>demo-spring-boot-cors</module>
         <module>demo-springboot-task</module>
         <module>demo-springboot-file-upload</module>
+        <module>demo-springboot-actuator</module>
+        <module>demo-spring-boot-admin</module>
+        <module>demo-springboot-payment</module>
     </modules>
 </project>

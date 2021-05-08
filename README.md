@@ -1,9 +1,17 @@
 ## 各种案例
 
-- `demo-aop`：面向切面编程aop
+- demo-aop：面向切面编程aop
   - demo-aop-proxy：动态代理
   - demo-aop-spring：spring-aop
+- demo-elasticsearch：elasticsearch搜索
+  - demo-elasticsearch-basic
+  - demo-elasticsearch-springboot
+- demo-mybatis:mybatis框架
+  - demo-mybatis-springboot
+  - demo-mybatis-tkmapper-springboot：通用mapper
 - demo-rabbitmq：rabbitmq消息队列
+  - demo-rabbitmq-basic
+  - demo-rabbitmq-springboot
 - demo-shiro：权限管理Shiro框架
   - demo-shiro-basic：基础部分
   - demo-shiro-spring：与spring整合

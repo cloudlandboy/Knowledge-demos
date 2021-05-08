@@ -43,15 +43,6 @@ public class ShiroConfiguration {
     @Autowired
     ShiroProperties shiroProperties;
 
-    //@Autowired
-    //private freemarker.template.Configuration configuration;
-
-    // 这样设置，访问会报错，见cn.clboy.demo.shiro.springboot.configuration.FreeMarkerShiroTagsConfigurer
-    //@PostConstruct
-    //public void addFreeMakerTag() {
-    //    configuration.setSharedVariable("shiro", new ShiroTags());
-    //}
-
     /**
      * 配置缓存管理器
      *

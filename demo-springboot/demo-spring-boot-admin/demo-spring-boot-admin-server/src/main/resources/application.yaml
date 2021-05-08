@@ -1,0 +1,9 @@
+#spring:
+#  boot:
+#    admin:
+#      instance-auth:
+#        default-user-name:
+#        default-password:
+
+server:
+  port: 9090

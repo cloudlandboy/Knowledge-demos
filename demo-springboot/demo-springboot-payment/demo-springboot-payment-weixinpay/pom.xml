@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>demo-springboot-payment</artifactId>
+        <groupId>cn.clboy</groupId>
+        <version>1.0.0-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>demo-springboot-payment-weixinpay</artifactId>
+
+    <properties>
+        <maven.compiler.source>8</maven.compiler.source>
+        <maven.compiler.target>8</maven.compiler.target>
+    </properties>
+
+    <dependencies>
+        <!--
+            IJPay，不依赖任何第三方 MVC 框架，仅仅作为工具使用简单快速完成支付模块的开发，可轻松嵌入到任何系统里
+            官网：https://javen205.gitee.io/ijpay/
+        -->
+        <dependency>
+            <groupId>com.github.javen205</groupId>
+            <artifactId>IJPay-WxPay</artifactId>
+            <version>2.7.1</version>
+        </dependency>
+    </dependencies>
+</project>

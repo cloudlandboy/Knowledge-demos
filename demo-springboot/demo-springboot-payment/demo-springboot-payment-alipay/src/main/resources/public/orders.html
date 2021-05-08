@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>订单列表</title>
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <style>
+        .box-card {
+            margin: 6px 0;
+        }
+
+        .el-card__header {
+            padding: 8px 20px;
+        }
+
+        .order-time {
+            margin: 0;
+            padding: 10px 0 0 4px;
+            font-size: 12px
+        }
+
+        .order-status {
+            padding: 8px 20px;
+            font-size: 12px;
+            border-radius: 15px;
+            float: right;
+            margin-top: 10px;
+        }
+
+        .order-item {
+            padding: 10px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+<div id="app">
+    <el-container>
+        <el-header>
+            <h1>订单列表</h1>
+        </el-header>
+        <el-main>
+            <div style="position: fixed;right: 28px;top: 28px">
+                <a href="/">返回商城</a>
+            </div>
+            <el-alert title="只显示最近20条订单" type="info"></el-alert>
+            <el-card class="box-card" v-for="order in orders" :key="order.id">
+                <div slot="header" class="clearfix">
+                    <el-row>
+                        <el-col :span="12">
+                            <span style="color: #e1251b">订单号：{{order.id}}</span>
+                            <p class="order-time">{{order.createTime}}</p>
+                        </el-col>
+                        <el-col :span="12">
+                            <el-button class="order-status" v-if="order.status == 1" type="success">已支付</el-button>
+                            <el-button class="order-status" v-if="order.status == 0" type="danger">未支付</el-button>
+                        </el-col>
+                    </el-row>
+                </div>
+
+                <div class="order-item-group">
+                    <el-row>
+                        <el-col class="order-item" :span="6">商品</el-col>
+                        <el-col class="order-item" :span="6">单价</el-col>
+                        <el-col class="order-item" :span="6">数量</el-col>
+                        <el-col class="order-item" :span="6">总计</el-col>
+                    </el-row>
+                    <div v-for="orderItem in order.orderItems" :key="orderItem.id">
+                        <el-row>
+                            <el-col class="order-item" :span="6">{{orderItem.name}}</el-col>
+                            <el-col class="order-item" :span="6">￥{{orderItem.price}}</el-col>
+                            <el-col class="order-item" :span="6">{{orderItem.num}}</el-col>
+                            <el-col class="order-item" :span="6">￥{{orderItem.total}}</el-col>
+                        </el-row>
+                    </div>
+                    <el-row>
+                        <el-col class="order-item" :span="6" :offset="18">￥{{order.price}}</el-col>
+                    </el-row>
+                </div>
+            </el-card>
+        </el-main>
+    </el-container>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script>
+    Vue.config.devtools = true;
+    axios.defaults.baseURL = '/order';
+    new Vue({
+        el: '#app',
+        data: {
+            orders: []
+        },
+        created() {
+            axios.get("/page/20/1").then(res => {
+                this.orders = res.data;
+            })
+        }
+    })
+</script>
+</body>
+</html>

@@ -5,6 +5,10 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 
 /**
  * spring bean的生命周期
+ * <p>
+ * 看注释：
+ *
+ * @see org.springframework.beans.factory.BeanFactory
  */
 public class DemoSpringBeanLifecycleApplication {
 

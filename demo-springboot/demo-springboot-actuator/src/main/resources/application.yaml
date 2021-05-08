@@ -1,0 +1,46 @@
+spring:
+  application:
+    name: demo-springboot-actuator
+  redis:
+    host: 127.0.0.1
+    port: 6379
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: root
+    password: root
+    url: jdbc:mysql://127.0.0.1:3306/demo-springboot-actuator?useUnicode=true&characterEncoding=UTF-8&useSSL=false&autoReconnect=true&failOverReadOnly=false&serverTimezone=GMT%2B8
+  rabbitmq:
+    addresses: 127.0.0.1
+    port: 5672
+    username: root
+    password: root
+    virtual-host: /demo-springboot-actuator
+  data:
+    elasticsearch:
+      client:
+        reactive:
+          endpoints: 127.0.0.1:9200
+server:
+  port: 8080
+management:
+  endpoints: #\u7EDF\u4E00\u914D\u7F6E
+    enabled-by-default: false # \u66B4\u9732\u6240\u6709\u7AEF\u70B9\u4FE1\u606F\uFF0C\u9ED8\u8BA4\u662Ftrue
+    web:
+      exposure:
+        include: "*" #\u4EE5web\u65B9\u5F0F\u66B4\u9732\u7684\u65AD\u70B9\uFF0C*\u4EE3\u8868\u6240\u6709
+  endpoint: #\u5177\u4F53\u5355\u4E2A\u914D\u7F6E
+    health:
+      enabled: true
+      show-details: always
+    info:
+      enabled: true
+    metrics:
+      enabled: true
+    loggers:
+      enabled: true
+    beans:
+      enabled: true
+info:
+  version: @project.version@ # \u83B7\u53D6maven\u914D\u7F6E\u6587\u4EF6\u4E2D\u7684\u5C5E\u6027
+  group: @project.groupId@
+  author: tester
